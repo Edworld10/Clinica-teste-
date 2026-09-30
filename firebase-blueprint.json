@@ -1,0 +1,268 @@
+{
+  "entities": {
+    "organization": {
+      "title": "Organization",
+      "description": "Clinic tenant organization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "legalName": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "openingHours": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "city", "state"]
+    },
+    "user_profile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based access",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["master", "admin", "medico", "recepcao", "financeiro", "paciente"] },
+        "organizationId": { "type": "string" },
+        "crm": { "type": "string" },
+        "specialty": { "type": "string" },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "professional": {
+      "title": "Professional",
+      "description": "Healthcare professional habilitated",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "name": { "type": "string" },
+        "crm": { "type": "string" },
+        "specialty": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "defaultRoomId": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "organizationId", "name", "crm", "specialty"]
+    },
+    "room": {
+      "title": "Room",
+      "description": "Consultation room or procedure room",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "organizationId", "name"]
+    },
+    "patient": {
+      "title": "Patient",
+      "description": "Clinical patient record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "name": { "type": "string" },
+        "cpf": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "birthDate": { "type": "string" },
+        "bloodType": { "type": "string" },
+        "allergies": { "type": "string" },
+        "insuranceProvider": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "name", "phone"]
+    },
+    "appointment": {
+      "title": "Appointment",
+      "description": "Medical appointment booking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "professionalId": { "type": "string" },
+        "professionalName": { "type": "string" },
+        "specialty": { "type": "string" },
+        "roomId": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["agendado", "confirmado", "em_espera", "em_atendimento", "concluido", "cancelado"] },
+        "type": { "type": "string" },
+        "price": { "type": "number" },
+        "paymentStatus": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "patientId", "professionalId", "date", "time", "status"]
+    },
+    "queue_entry": {
+      "title": "QueueEntry",
+      "description": "Live reception queue and triage tracker",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "appointmentId": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "professionalId": { "type": "string" },
+        "professionalName": { "type": "string" },
+        "ticketNumber": { "type": "string" },
+        "status": { "type": "string", "enum": ["esperando_triagem", "aguardando_medico", "em_consulta", "finalizado"] },
+        "arrivedAt": { "type": "string" },
+        "vitalsPressure": { "type": "string" },
+        "vitalsTemp": { "type": "string" },
+        "vitalsWeight": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "patientId", "status", "ticketNumber"]
+    },
+    "medical_record": {
+      "title": "MedicalRecord",
+      "description": "Confidential patient electronic health record with evolution and prescription",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "patientId": { "type": "string" },
+        "professionalId": { "type": "string" },
+        "professionalName": { "type": "string" },
+        "professionalCrm": { "type": "string" },
+        "appointmentId": { "type": "string" },
+        "date": { "type": "string" },
+        "subjective": { "type": "string" },
+        "objective": { "type": "string" },
+        "assessment": { "type": "string" },
+        "plan": { "type": "string" },
+        "rectified": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "patientId", "professionalId", "professionalCrm", "date"]
+    },
+    "private_document": {
+      "title": "PrivateDocument",
+      "description": "Patient exam, prescription or certificate document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "patientId": { "type": "string" },
+        "uploaderId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "isConfidential": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "patientId", "title", "category"]
+    },
+    "financial_transaction": {
+      "title": "FinancialTransaction",
+      "description": "Payment or expense without exposing clinical notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["receita", "despesa"] },
+        "paymentMethod": { "type": "string" },
+        "status": { "type": "string" },
+        "dueDate": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "description", "amount", "type", "status"]
+    },
+    "inventory_item": {
+      "title": "InventoryItem",
+      "description": "Clinic medical supply and medication stock",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "name": { "type": "string" },
+        "currentQuantity": { "type": "number" },
+        "minQuantity": { "type": "number" },
+        "batchNumber": { "type": "string" },
+        "expirationDate": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "name", "currentQuantity", "minQuantity"]
+    },
+    "audit_log": {
+      "title": "AuditLog",
+      "description": "Auditing log for security and clinical access",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userRole": { "type": "string" },
+        "userName": { "type": "string" },
+        "action": { "type": "string" },
+        "resource": { "type": "string" },
+        "resourceId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "organizationId", "userId", "action", "resource"]
+    }
+  },
+  "firestore": {
+    "/organizations/{orgId}": {
+      "schema": { "$ref": "#/entities/organization" },
+      "description": "Tenant clinic organization details"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/user_profile" },
+      "description": "User profile and role credentials"
+    },
+    "/organizations/{orgId}/professionals/{profId}": {
+      "schema": { "$ref": "#/entities/professional" },
+      "description": "Clinical staff and doctors"
+    },
+    "/organizations/{orgId}/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/room" },
+      "description": "Consultation offices and rooms"
+    },
+    "/organizations/{orgId}/patients/{patientId}": {
+      "schema": { "$ref": "#/entities/patient" },
+      "description": "Registered patients"
+    },
+    "/organizations/{orgId}/appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/appointment" },
+      "description": "Appointments scheduled"
+    },
+    "/organizations/{orgId}/queue/{queueId}": {
+      "schema": { "$ref": "#/entities/queue_entry" },
+      "description": "Day triage and waiting queue"
+    },
+    "/organizations/{orgId}/medical_records/{recordId}": {
+      "schema": { "$ref": "#/entities/medical_record" },
+      "description": "Confidential patient health records accessible only by authorized doctors"
+    },
+    "/organizations/{orgId}/private_documents/{docId}": {
+      "schema": { "$ref": "#/entities/private_document" },
+      "description": "Confidential exam and prescription documents"
+    },
+    "/organizations/{orgId}/financial/{txId}": {
+      "schema": { "$ref": "#/entities/financial_transaction" },
+      "description": "Revenue, expenses and payments without clinical data"
+    },
+    "/organizations/{orgId}/inventory/{itemId}": {
+      "schema": { "$ref": "#/entities/inventory_item" },
+      "description": "Medical materials and supplies inventory"
+    },
+    "/organizations/{orgId}/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/audit_log" },
+      "description": "Immutable security access and mutation logs"
+    }
+  }
+}

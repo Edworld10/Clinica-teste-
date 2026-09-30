@@ -1,0 +1,132 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && request.auth.token.email == "sikhdiihpaw@gmail.com";
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Check user profile role in /users/{userId}
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function getUserOrg() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId;
+    }
+
+    // User profile collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isBootstrappedAdmin());
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isBootstrappedAdmin());
+      allow delete: if isBootstrappedAdmin();
+    }
+
+    // Tenant Organization
+    match /organizations/{orgId} {
+      allow read: if isSignedIn();
+      allow write: if isBootstrappedAdmin() || (isSignedIn() && (getUserRole() == 'admin' || getUserRole() == 'master'));
+
+      // Professionals
+      match /professionals/{profId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && (getUserRole() == 'admin' || getUserRole() == 'master' || isBootstrappedAdmin());
+      }
+
+      // Rooms
+      match /rooms/{roomId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && (getUserRole() == 'admin' || getUserRole() == 'master' || isBootstrappedAdmin());
+      }
+
+      // Patients
+      match /patients/{patientId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn() && (getUserRole() in ['admin', 'medico', 'recepcao', 'master'] || isBootstrappedAdmin() || request.auth.uid == patientId);
+        allow delete: if isSignedIn() && (getUserRole() == 'admin' || isBootstrappedAdmin());
+      }
+
+      // Appointments
+      match /appointments/{appointmentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if isSignedIn();
+        allow delete: if isSignedIn() && (getUserRole() in ['admin', 'recepcao'] || isBootstrappedAdmin());
+      }
+
+      // Reception Queue
+      match /queue/{queueId} {
+        allow read: if isSignedIn();
+        allow create, update: if isSignedIn();
+        allow delete: if isSignedIn() && (getUserRole() in ['admin', 'recepcao'] || isBootstrappedAdmin());
+      }
+
+      // Medical Records (Prontuário Eletrônico) - Strictly protected! Master does NOT have access!
+      match /medical_records/{recordId} {
+        allow read: if isSignedIn() && (
+          getUserRole() == 'medico' ||
+          (getUserRole() == 'admin') ||
+          (existing().patientId == request.auth.uid)
+        );
+        allow create: if isSignedIn() && (getUserRole() == 'medico' || isBootstrappedAdmin());
+        allow update: if isSignedIn() && (getUserRole() == 'medico' || isBootstrappedAdmin());
+        allow delete: if false; // Medical records cannot be deleted; retifications must preserve history!
+      }
+
+      // Private Documents
+      match /private_documents/{docId} {
+        allow read: if isSignedIn() && (
+          getUserRole() in ['medico', 'admin', 'recepcao'] ||
+          existing().patientId == request.auth.uid
+        );
+        allow create: if isSignedIn();
+        allow update: if isSignedIn() && (getUserRole() in ['medico', 'admin'] || existing().patientId == request.auth.uid);
+        allow delete: if isSignedIn() && (getUserRole() == 'admin' || isBootstrappedAdmin());
+      }
+
+      // Financial Transactions - Reception / Doctor don't see full P&L, Master sees aggregate
+      match /financial/{txId} {
+        allow read: if isSignedIn() && (getUserRole() in ['admin', 'financeiro', 'master'] || isBootstrappedAdmin());
+        allow write: if isSignedIn() && (getUserRole() in ['admin', 'financeiro'] || isBootstrappedAdmin());
+      }
+
+      // Inventory
+      match /inventory/{itemId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && (getUserRole() in ['admin', 'recepcao', 'financeiro'] || isBootstrappedAdmin());
+      }
+
+      // Audit Logs - Immutable, append-only
+      match /audit_logs/{logId} {
+        allow read: if isSignedIn() && (getUserRole() in ['admin', 'master'] || isBootstrappedAdmin());
+        allow create: if isSignedIn();
+        allow update, delete: if false; // Audits cannot be altered or removed
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Clinica Lucia - Sistema de Gestão Clínica Médica",
+  "description": "SaaS completo para clínicas médicas: agenda, recepção, fila em tempo real, prontuário eletrônico com auditoria, financeiro, estoque e portal do paciente.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
